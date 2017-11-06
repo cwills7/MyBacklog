@@ -7,6 +7,7 @@ package com.local.carl.mybacklog.db;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -64,7 +65,7 @@ public class BacklogDb extends SQLiteOpenHelper {
 
     public List<Item> getAllFromCategory(String name){
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res = db.rawQuery("select * from item where categoryname = "+name, null);
+        Cursor res = db.rawQuery("select * from item where categoryname = '"+name + "'", null);
         res.moveToFirst();
         List<Item> itemList = new ArrayList<Item>();
         if (res.getCount()==0) {
@@ -88,7 +89,7 @@ public class BacklogDb extends SQLiteOpenHelper {
 
     public Category getAllAsCategory(String name){
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res = db.rawQuery("select * from item where categoryname = "+name, null);
+        Cursor res = db.rawQuery("select * from item where categoryname = '"+name + "'", null);
         res.moveToFirst();
         List<Item> itemList = new ArrayList<Item>();
         if (res.getCount()==0) {
@@ -111,6 +112,20 @@ public class BacklogDb extends SQLiteOpenHelper {
         return new Category(name, itemList);
     }
 
+    public List<String> getAllCategories(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("select distinct categoryname from item", null);
+        List <String> categoryList = new ArrayList<>();
+        res.moveToFirst();
+        while (!res.isAfterLast()){
+            String val = res.getString(res.getColumnIndex(CATEGORY_NAME));
+            categoryList.add(val);
+            res.moveToNext();
+        }
+        res.close();
+        return categoryList;
+    }
+
     public List<Item> getTopTenPriority(){
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery("select * from item order by priority desc", null);
@@ -120,18 +135,21 @@ public class BacklogDb extends SQLiteOpenHelper {
             res.close();
             return new ArrayList<>();
         }
-
-        for(int i = 0; i < 10; i++){
-            Item it = new Item();
-            it.setName(res.getString(res.getColumnIndex(ITEM_NAME)));
-            it.setDesc(res.getString(res.getColumnIndex(ITEM_DESCRIPTION)));
-            it.setPriority(res.getInt(res.getColumnIndex(PRIORITY)));
-            it.setOwn(intToBoolean(res.getInt(res.getColumnIndex(OWN))));
-            it.setFinished(intToBoolean(res.getInt(res.getColumnIndex(DONE))));
-            it.setRating(res.getDouble(res.getColumnIndex(RATING)));
-            it.setCategoryName(res.getString(res.getColumnIndex(CATEGORY_NAME)));
-            itemList.add(it);
-            res.moveToNext();
+        try {
+            for (int i = 0; i < 10; i++) {
+                Item it = new Item();
+                it.setName(res.getString(res.getColumnIndex(ITEM_NAME)));
+                it.setDesc(res.getString(res.getColumnIndex(ITEM_DESCRIPTION)));
+                it.setPriority(res.getInt(res.getColumnIndex(PRIORITY)));
+                it.setOwn(intToBoolean(res.getInt(res.getColumnIndex(OWN))));
+                it.setFinished(intToBoolean(res.getInt(res.getColumnIndex(DONE))));
+                it.setRating(res.getDouble(res.getColumnIndex(RATING)));
+                it.setCategoryName(res.getString(res.getColumnIndex(CATEGORY_NAME)));
+                itemList.add(it);
+                res.moveToNext();
+            }
+        }catch (CursorIndexOutOfBoundsException oob){
+            //Eat. Means we have less than 10 items total.
         }
         res.close();
         return itemList;

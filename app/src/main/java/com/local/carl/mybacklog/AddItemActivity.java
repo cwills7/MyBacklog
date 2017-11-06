@@ -2,6 +2,8 @@ package com.local.carl.mybacklog;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -28,7 +30,7 @@ public class AddItemActivity extends Activity {
     BacklogDb db;
 
     @Override
-    public void onCreate(Bundle savedInstance){
+    public void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
         setContentView(R.layout.add_item_activity);
 
@@ -51,14 +53,47 @@ public class AddItemActivity extends Activity {
                 Item item = new Item();
                 item.setName(itemNameInput.getText().toString());
                 item.setDesc(itemDescInput.getText().toString());
-                item.setRating(Double.parseDouble(ratingInput.getText().toString()));
-                //item.setCategoryName(categoryNameInput.get);
+                item.setRating(parseIfAvailable(ratingInput.getText().toString()));
+                item.setCategoryName(categoryNameInput.getText().toString());
                 item.setOwn(ownedInput.isChecked());
+                item.setPriority(priorityInput.getValue());
                 db.insertItem(item);
+                finish();
             }
         });
 
-
-
     }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.submit, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.submit) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    private double parseIfAvailable(String parsable){
+        double returnable;
+        try{
+            returnable = Double.parseDouble(parsable);
+        } catch(Exception e){
+            return 0.0;
+        }
+        return returnable;
+    }
+
 }
