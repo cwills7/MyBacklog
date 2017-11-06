@@ -85,13 +85,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         navView = (NavigationView) findViewById(R.id.nav_view);
 
-        Menu m = navView.getMenu();
-        SubMenu topChannelMenu = m.addSubMenu("Categories");
-        List<String> categoryList = db.getAllCategories();
-        topChannelMenu.add("None");
-        for (int i = 0; i < categoryList.size(); i++){
-            topChannelMenu.add(categoryList.get(i));
-        }
+
+        updateNavViewSubMenu();
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerToggle=new ActionBarDrawerToggle(this,drawerLayout,toolbar,R.string.navigation_drawer_open,R.string.navigation_drawer_close);
         drawerLayout.setDrawerListener(drawerToggle);
@@ -121,6 +116,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
 
+    }
+
+    private void updateNavViewSubMenu() {
+        Menu m = navView.getMenu();
+        SubMenu topChannelMenu = m.addSubMenu("Categories");
+        List<String> categoryList = db.getAllCategories();
+        topChannelMenu.add("None");
+        for (int i = 0; i < categoryList.size(); i++){
+            topChannelMenu.add(categoryList.get(i));
+        }
     }
 
     private void setupViewPager(ViewPager viewPager) {

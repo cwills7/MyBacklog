@@ -13,6 +13,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.local.carl.mybacklog.db.BacklogDb;
+
 import java.util.List;
 
 
@@ -21,7 +23,7 @@ import java.util.List;
  */
 
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ItemHolder> implements View.OnClickListener, View.OnLongClickListener {
-
+    BacklogDb db;
 
     public static class ItemHolder extends RecyclerView.ViewHolder{
         CardView cv;
@@ -112,7 +114,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ItemHolder> implem
         //Intent intent = new Intent(v.getContext(), AddItemActivity.class);
         //v.getContext().startActivity(intent);
         Toast.makeText(v.getContext(), "Long Clicked: " + item.getName(), Toast.LENGTH_SHORT).show();
-
+        db = new BacklogDb(v.getContext());
 
         final PopupMenu popup = new PopupMenu(v.getContext(), v);
         popup.getMenuInflater().inflate(R.menu.context_popup, popup.getMenu());
@@ -125,6 +127,9 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ItemHolder> implem
             }
             else if (i == R.id.context_delete){
                 //do something
+                db.deleteItem(item.getName());
+                removeItemFromItemsByName(item.getName());
+                notifyDataSetChanged();
                 return true;
             }
             else if (i == R.id.context_mark_as_done) {
@@ -137,7 +142,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ItemHolder> implem
         }});
         popup.show();
         Toast.makeText(v.getContext(), "Item Finished: " + item.isFinished(), Toast.LENGTH_SHORT).show();
-
         return true;
     }
 
@@ -148,5 +152,13 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ItemHolder> implem
 
     public void setItems(List<Item> itemList){
         this.items = itemList;
+    }
+
+    public void removeItemFromItemsByName(String name){
+        for (int i = 0; i < items.size(); i++){
+            if (items.get(i).getName().equals(name)){
+                items.remove(i);
+            }
+        }
     }
 }

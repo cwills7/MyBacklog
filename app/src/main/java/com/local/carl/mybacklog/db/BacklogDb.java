@@ -58,7 +58,7 @@ public class BacklogDb extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS item");
         db.execSQL(
                 "create table item " +
-                        "(itemname text primary key, categoryname text itemdescription text, priority integer," +
+                        "(itemname text primary key, categoryname text, itemdescription text, priority integer," +
                         " done integer, own integer, rating double)"
         );
     }
@@ -184,6 +184,11 @@ public class BacklogDb extends SQLiteOpenHelper {
         values.put(RATING, item.getRating());
         values.put(DONE, boolToInt(item.isFinished()));
         db.insert(ITEM_TABLE_NAME, null, values);
+    }
+
+    public boolean deleteItem(String itemName){
+        SQLiteDatabase db = this.getWritableDatabase();
+        return db.delete(ITEM_TABLE_NAME, ITEM_NAME + "='" + itemName + "'", null) > 0;
     }
 
 
